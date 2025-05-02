@@ -1,0 +1,74 @@
+<script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library/build/nn.min.js"></script>
+<script src="https://unpkg.com/tone"></script>
+
+<script>
+/* global nn */
+  
+const synth = new Tone.Synth().toDestination()
+let keydown = false
+
+function startPlaying () {
+  if (keydown) {
+  synth.triggerAttack(440)
+  keydown = true
+  }
+}
+  
+
+function stopPlaying(){
+  synth.triggerRelease()
+  keydown = false
+}
+ 
+nn.on('keydown', startPlaying)
+nn.on('keyup', stopPlaying)
+  
+const filename = 'electric-piano-chords.mp3'
+let music
+const samples = {
+  a: {offset: 2.456186618165785, duration: -0.21995701058201078},
+  b: {offset: 3.5350233843537415, duration: 0.21995701058201078},
+  c: {offset: 4.320584136432351, duration: 0.2985130857898719}
+}
+
+/*async function remix() {
+  
+  music.currentTime = nn.random(0, music.duration)
+  music.volume = nn.random(0.25, 0.5)
+  const time = nn.random(250, 500)
+  await nn.sleep(time)
+  await nn.sleep(500)
+  remix()
+} */
+
+async function play(a){
+  const s = samples[a.key]
+  music.preservePitch = false
+  music.playbackrate = 2
+
+  nn.get('body').css('background', s.color)
+  music.currentTime = s.offset
+  music.play()
+  await nn.sleep(s.duration * 1000)
+  music.pause()
+  
+}
+function setUp() {
+  
+  nn.create('audio')
+    .set({
+      src: filename,
+      controls: true,
+      loop: true
+    
+  })  
+    .addTo('body')
+   // .on('loadeddata', remix)
+}
+
+
+nn.on('load', setUp)
+nn.on('keydown', play)
+
+
+</script>
